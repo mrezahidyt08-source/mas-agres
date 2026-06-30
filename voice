@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pegadaian Voice - Prototype</title>
+  <style>
+    /* Menambahkan definisi variabel CSS agar tampilan berfungsi penuh */
+    :root {
+      --font-sans: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --color-background-primary: #ffffff;
+      --color-background-secondary: #f9fafb;
+      --color-background-info: #eff6ff;
+      --color-border-secondary: #e5e7eb;
+      --color-border-tertiary: #d1d5db;
+      --color-border-info: #bfdbfe;
+      --color-text-primary: #111827;
+      --color-text-secondary: #4b5563;
+      --color-text-info: #1d4ed8;
+      --border-radius-lg: 16px;
+      --border-radius-md: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: var(--font-sans); 
+      background-color: #f3f4f6; /* Warna latar belakang luar frame */
+      padding: 20px;
+    }
+    
+    .screen { display: none; padding: 0; }
+    .screen.active { display: block; }
+    .phone-frame {
+      max-width: 380px;
+      margin: 1rem auto;
+      background: var(--color-background-primary);
+      border-radius: 32px;
+      border: 2px solid var(--color-border-secondary);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      overflow: hidden;
+      min-height: 620px;
+      display: flex;
+      flex-direction: column;
+    }
+    .header-bar {
+      background: #2D6A2D;
+      padding: 18px 20px 14px;
+      text-align: center;
+      color: #fff;
+    }
+    .logo-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .logo-circle {
+      width: 36px; height: 36px;
+      background: #FFD700;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 500; font-size: 11px; color: #2D6A2D;
+    }
+    .logo-text { font-size: 15px; font-weight: 500; letter-spacing: 0.5px; }
+    .content-area {
+      flex: 1;
+      padding: 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    .welcome-icon {
+      width: 72px; height: 72px;
+      background: #E8F5E9;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 36px;
+      margin: 8px auto 0;
+    }
+    .welcome-title {
+      font-size: 18px; font-weight: 500;
+      color: var(--color-text-primary);
+      text-align: center;
+      line-height: 1.4;
+    }
+    .welcome-sub {
+      font-size: 13px;
+      color: var(--color-text-secondary);
+      text-align: center;
+      line-height: 1.6;
+    }
+    .question-card {
+      width: 100%;
+      background: var(--color-background-secondary);
+      border-radius: var(--border-radius-lg);
+      padding: 16px;
+      border: 0.5px solid var(--color-border-tertiary);
+    }
+    .question-text {
+      font-size: 14px;
+      color: var(--color-text-primary);
+      margin-bottom: 12px;
+      font-weight: 500;
+      text-align: center;
+    }
+    .btn-row {
+      display: flex; gap: 10px; justify-content: center;
+    }
+    .btn-yn {
+      flex: 1;
+      padding: 10px;
+      border-radius: var(--border-radius-md);
+      border: 1.5px solid;
+      font-size: 14px; font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--color-background-primary);
+    }
+    .btn-yes { border-color: #2D6A2D; color: #2D6A2D; }
+    .btn-yes:hover, .btn-yes.selected { background: #2D6A2D; color: #fff; }
+    .btn-no { border-color: #C0392B; color: #C0392B; }
+    .btn-no:hover, .btn-no.selected { background: #C0392B; color: #fff; }
+    .btn-next {
+      width: 100%;
+      padding: 13px;
+      background: #2D6A2D;
+      color: #fff;
+      border: none;
+      border-radius: var(--border-radius-md);
+      font-size: 15px; font-weight: 500;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.15s;
+    }
+    .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-next:not(:disabled):hover { opacity: 0.88; }
+    .step-dots {
+      display: flex; gap: 6px; justify-content: center; margin-top: auto; padding: 16px 0 8px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-border-secondary); }
+    .dot.active { background: #2D6A2D; }
+    .rating-section { width: 100%; text-align: center; }
+    .stars-row { display: flex; justify-content: center; gap: 10px; margin: 12px 0; }
+    .star-btn {
+      font-size: 38px; cursor: pointer;
+      color: #ccc;
+      background: none; border: none; padding: 2px;
+      transition: color 0.1s, transform 0.1s;
+      line-height: 1;
+    }
+    .star-btn.lit { color: #F5A623; }
+    .star-btn:hover { transform: scale(1.15); }
+    .rating-label {
+      font-size: 13px; color: var(--color-text-secondary);
+      min-height: 20px; margin-top: 4px;
+    }
+    .form-title {
+      font-size: 15px; font-weight: 500;
+      color: var(--color-text-primary);
+      text-align: center; margin-bottom: 4px;
+    }
+    .form-sub {
+      font-size: 12px; color: var(--color-text-secondary);
+      text-align: center; margin-bottom: 14px; line-height: 1.5;
+    }
+    .form-group { width: 100%; margin-bottom: 10px; }
+    .form-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 4px; display: block; }
+    .form-input {
+      width: 100%; padding: 9px 12px;
+      border: 0.5px solid var(--color-border-secondary);
+      border-radius: var(--border-radius-md);
+      font-size: 13px;
+      background: var(--color-background-primary);
+      color: var(--color-text-primary);
+    }
+    .form-input:focus { outline: 2px solid #2D6A2D; border-color: transparent; }
+    textarea.form-input { resize: none; min-height: 70px; }
+    .thankyou-icon { font-size: 52px; margin: 12px 0; text-align: center; }
+    .thankyou-title { font-size: 18px; font-weight: 500; text-align: center; color: var(--color-text-primary); }
+    .thankyou-sub { font-size: 13px; color: var(--color-text-secondary); text-align: center; line-height: 1.6; margin-top: 8px; }
+    .tag-bar {
+      background: #F5A623;
+      color: #4A2800;
+      font-size: 11px; font-weight: 500;
+      text-align: center;
+      padding: 4px 0;
+      letter-spacing: 0.5px;
+    }
+    .google-link-box {
+      background: #E8F5E9; border: 1px solid #A5D6A7;
+      border-radius: var(--border-radius-md);
+      padding: 14px; text-align: center; width: 100%;
+    }
+    .google-link-box p { font-size: 13px; color: #2D6A2D; margin-bottom: 10px; }
+    .btn-google {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #2D6A2D; color: #fff;
+      padding: 9px 18px; border-radius: var(--border-radius-md);
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      border: none; text-decoration: none;
+    }
+    .btn-google:hover { opacity: 0.88; }
+    .nav-back {
+      font-size: 12px; color: var(--color-text-secondary);
+      text-align: center; cursor: pointer; margin-top: 4px;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone-frame">
+    <div class="tag-bar">PEGADAIAN VOICE</div>
+    <div class="header-bar">
+      <div class="logo-row">
+        <div class="logo-circle">PG</div>
+        <span class="logo-text">Pegadaian</span>
+      </div>
+      <div style="font-size:11px; opacity:0.85;">Cabang Purwokerto</div>
+    </div>
+
+    <div class="screen active content-area" id="screen1">
+      <div class="welcome-icon">🤝</div>
+      <div class="welcome-title">Selamat Datang,<br>Sahabat Pegadaian!</div>
+      <div class="welcome-sub">Bantu kami untuk memberikan<br>pelayanan terbaik bagi Anda.</div>
+
+      <div class="question-card">
+        <div class="question-text">Bagaimana pelayanan kami?</div>
+        <div class="btn-row">
+          <button class="btn-yn btn-yes" onclick="selectQ1('ya')">👍 Ya, Baik</button>
+          <button class="btn-yn btn-no" onclick="selectQ1('tidak')">👎 Tidak</button>
+        </div>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">Apakah Anda puas dengan pelayanan kami?</div>
+        <div class="btn-row">
+          <button class="btn-yn btn-yes" id="q2yes" onclick="selectQ2('ya')">✅ Ya, Puas</button>
+          <button class="btn-yn btn-no" id="q2no" onclick="selectQ2('tidak')">❌ Tidak</button>
+        </div>
+      </div>
+
+      <button class="btn-next" id="btnNext1" disabled onclick="goTo('screen2')">Lanjutkan →</button>
+      <div class="step-dots">
+        <div class="dot active"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+
+    <div class="screen content-area" id="screen2">
+      <div class="welcome-icon">⭐</div>
+      <div class="welcome-title">Berikan Rating<br>Pelayanan Kami</div>
+      <div class="welcome-sub">Sentuh bintang untuk memberikan penilaian Anda</div>
+
+      <div class="rating-section">
+        <div class="stars-row" id="starsRow">
+          <button class="star-btn" onclick="rate(1)" aria-label="1 bintang">★</button>
+          <button class="star-btn" onclick="rate(2)" aria-label="2 bintang">★</button>
+          <button class="star-btn" onclick="rate(3)" aria-label="3 bintang">★</button>
+          <button class="star-btn" onclick="rate(4)" aria-label="4 bintang">★</button>
+          <button class="star-btn" onclick="rate(5)" aria-label="5 bintang">★</button>
+        </div>
+        <div class="rating-label" id="ratingLabel">Pilih rating Anda</div>
+      </div>
+
+      <div id="googleBox" style="display:none; width:100%;">
+        <div class="google-link-box">
+          <p>Terima kasih atas penilaian positif Anda! 🎉<br>Bantu kami dengan meninggalkan ulasan di Google:</p>
+          <a class="btn-google" href="https://www.google.com/search?q=pegadaian+purwokerto&client=ms-android-oppo-terr1-rso2&hs=hO5p&sca_esv=ec2bff8bd1e2ef21&sxsrf=ANbL-n46pd7I0hKqqJzpK3XpatyFWXTmXA%3A1781593567758&ei=3_UwasLqLbOUjuMP_ILPsQ4&biw=360&bih=692&oq=pegadaian+purwoker&sclient=mobile-gws-wiz-serp#ebo=0" target="_blank">
+            ⭐ Beri Ulasan Google
+          </a>
+        </div>
+        <button class="btn-next" style="margin-top:12px;" onclick="goTo('screen3thanks')">Selesai ✓</button>
+      </div>
+
+      <div id="formBox" style="display:none; width:100%;">
+        <div class="question-card" style="background:var(--color-background-info); border-color: var(--color-border-info);">
+          <div style="font-size:13px; color:var(--color-text-info); text-align:center;">
+            Kami ingin mendengar masukan Anda. Silakan isi form aspirasi berikut.
+          </div>
+        </div>
+        <button class="btn-next" onclick="goTo('screen3form')">Isi Form Aspirasi →</button>
+      </div>
+
+      <div class="nav-back" onclick="goTo('screen1')">← Kembali</div>
+      <div class="step-dots">
+        <div class="dot"></div><div class="dot active"></div><div class="dot"></div>
+      </div>
+    </div>
+
+    <div class="screen content-area" id="screen3form" style="padding: 16px 20px;">
+      <div class="form-title">Form Aspirasi & Masukan</div>
+      <div class="form-sub">Masukan Anda sangat berarti untuk peningkatan layanan kami</div>
+
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap *</label>
+        <input class="form-input" type="text" placeholder="Masukkan nama Anda" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Alamat</label>
+        <input class="form-input" type="text" placeholder="Jalan, Kelurahan, Kecamatan" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">No. HP / Alamat Email *</label>
+        <input class="form-input" type="text" placeholder="08xx... atau email@..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Masukan / Keluhan Anda</label>
+        <textarea class="form-input" placeholder="Ceritakan pengalaman atau saran Anda..."></textarea>
+      </div>
+      <button class="btn-next" onclick="goTo('screen3thanks')">Kirim Aspirasi ✓</button>
+      <div class="nav-back" onclick="goTo('screen2')">← Kembali</div>
+      <div class="step-dots">
+        <div class="dot"></div><div class="dot"></div><div class="dot active"></div>
+      </div>
+    </div>
+
+    <div class="screen content-area" id="screen3thanks">
+      <div class="thankyou-icon">🙏</div>
+      <div class="thankyou-title">Terima Kasih!</div>
+      <div class="thankyou-sub">
+        Penilaian dan masukan Anda telah kami terima.<br><br>
+        Kami berkomitmen untuk terus meningkatkan kualitas layanan Pegadaian bagi seluruh Sahabat.
+      </div>
+      <div style="margin-top:16px; background:#E8F5E9; border-radius:var(--border-radius-md); padding:14px; text-align:center; width:100%;">
+        <div style="font-size:12px; color:#2D6A2D; font-weight:500;">Menghubungi Kami</div>
+        <div style="font-size:12px; color:var(--color-text-secondary); margin-top:4px;">📞 1500-569 | 📧 cs@pegadaian.co.id</div>
+      </div>
+      <button class="btn-next" onclick="resetAll()">Mulai Ulang ↩</button>
+    </div>
+  </div>
+
+  <script>
+    let q1 = null, q2 = null, currentRating = 0;
+
+    function goTo(id) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function selectQ1(val) {
+      q1 = val;
+      document.querySelectorAll('.question-card:first-of-type .btn-yn').forEach(b => b.classList.remove('selected'));
+      event.target.classList.add('selected');
+      checkNext1();
+    }
+
+    function selectQ2(val) {
+      q2 = val;
+      document.getElementById('q2yes').classList.remove('selected');
+      document.getElementById('q2no').classList.remove('selected');
+      event.target.classList.add('selected');
+      checkNext1();
+    }
+
+    function checkNext1() {
+      document.getElementById('btnNext1').disabled = !(q1 && q2);
+    }
+
+    const labels = ['', 'Sangat Buruk 😞', 'Kurang Baik 😕', 'Cukup 😐', 'Baik 😊', 'Sangat Baik 🌟'];
+
+    function rate(n) {
+      currentRating = n;
+      const stars = document.querySelectorAll('.star-btn');
+      stars.forEach((s, i) => { s.classList.toggle('lit', i < n); });
+      document.getElementById('ratingLabel').textContent = labels[n];
+
+      const gBox = document.getElementById('googleBox');
+      const fBox = document.getElementById('formBox');
+
+      if (n >= 4) {
+        gBox.style.display = 'block';
+        fBox.style.display = 'none';
+      } else {
+        fBox.style.display = 'block';
+        gBox.style.display = 'none';
+      }
+    }
+
+    function resetAll() {
+      q1 = null; q2 = null; currentRating = 0;
+      document.querySelectorAll('.btn-yn').forEach(b => b.classList.remove('selected'));
+      document.querySelectorAll('.star-btn').forEach(b => b.classList.remove('lit'));
+      document.getElementById('ratingLabel').textContent = 'Pilih rating Anda';
+      document.getElementById('googleBox').style.display = 'none';
+      document.getElementById('formBox').style.display = 'none';
+      document.getElementById('btnNext1').disabled = true;
+      document.querySelectorAll('.form-input').forEach(i => i.value = '');
+      goTo('screen1');
+    }
+  </script>
+</body>
+</html>
